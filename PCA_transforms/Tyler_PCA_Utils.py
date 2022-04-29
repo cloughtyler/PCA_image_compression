@@ -21,11 +21,12 @@ def complete_transform(data, n_components):
     # then just run T through PCA and see if perform better
     
     T = [R,G,B]
+    T = np.transpose(T) # (32*32) x 3 matrix
     
     # PCA transform
-    print(np.isinf(R).any())
-    r_proj, r_pca = pca_transform(R, n_components)
-    print("Red is transformed")
+    print(np.isinf(T).any())
+    T_proj, T_pca = pca_transform(T, n_components)
+    print("T is transformed")
     g_proj, g_pca = pca_transform(G, n_components)
     print("Green is transformed")
     b_proj, b_pca = pca_transform(B, n_components)
