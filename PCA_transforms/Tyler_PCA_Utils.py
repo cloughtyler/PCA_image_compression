@@ -17,35 +17,37 @@ def complete_transform(data, n_components):
     X=data.data
     R,G,B = X[:,:,:,0].reshape(X.shape[0],-1), X[:,:,:,1].reshape(X.shape[0],-1), X[:,:,:,2].reshape(X.shape[0],-1)
     
-    # edits: use the split RGB values to create (32*32) x 3 data matrix T where R,G,B are 'variables'
+    # start of edits: 
+    # use the split RGB values to create (32*32) x 3 data matrix T where R,G,B are 'variables'
     # then just run T through PCA and see if perform better
     
-    T = [R,G,B]
-    T = np.transpose(T) # (32*32) x 3 matrix
+    # reshape R,G,B down to vectors *not sure if code correct
+    R1 = R.reshape([1024,1])
+    G1 = G.reshape([1024,1])
+    B1 = B.reshape([1024,1])
+    T = [R1,G1,B1] # creates 1024 x 3 matrix *?*
     
     # PCA transform
     print(np.isinf(T).any())
     T_proj, T_pca = pca_transform(T, n_components)
     print("T is transformed")
-    g_proj, g_pca = pca_transform(G, n_components)
-    print("Green is transformed")
-    b_proj, b_pca = pca_transform(B, n_components)
-    print("Blue is transformed")
-    # concat
+    
+    # split back into 32x32 RGB matrices so can re-combine back into image
+    r_proj,g_proj,b_proj = T_proj[:,0].reshape([32,32]), T_proj[:,1].reshape([32,32]), T_proj[:,2].reshape([32,32]))
+    
     data_proj = np.stack((r_proj, g_proj, b_proj), axis=2)
     # reshape to square images
     data_proj = data_proj.reshape(X.shape[0], np.sqrt(n_components).astype('uint8'), 
                                     np.sqrt(n_components).astype('uint8'), 3)
     # inverse transform
     print("Beginning inverse transform")
-    r_inv = pca_inverse_transform(r_proj, r_pca)
-    g_inv = pca_inverse_transform(g_proj, g_pca)
-    b_inv = pca_inverse_transform(b_proj, b_pca)
+    T_inv = pca_inverse_transform(T_proj, T_pca)
     # reshape to square
     print("Inverse transform has finished")
-    r_imgs = np.reshape(r_inv, (X.shape[0], X.shape[1], X.shape[2]))
-    g_imgs = np.reshape(g_inv, (X.shape[0], X.shape[1], X.shape[2]))
-    b_imgs = np.reshape(b_inv, (X.shape[0], X.shape[1], X.shape[2]))
+    # **check dimensions of reshape
+    r_imgs = np.reshape(T_inv[:,0], [32,32,1])
+    g_imgs = np.reshape(T_inv[:,1], [32,32,1])
+    b_imgs = np.reshape(T_inv[:,1], [32,32,1])
     # concat
     reconstructed_imgs = np.stack((r_imgs, g_imgs, b_imgs), axis=3)
     
