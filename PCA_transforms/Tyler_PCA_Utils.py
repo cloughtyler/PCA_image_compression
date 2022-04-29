@@ -51,4 +51,4 @@ def complete_transform(data, n_components):
     # concat
     reconstructed_imgs = np.stack((r_imgs, g_imgs, b_imgs), axis=3)
     
-    return reconstructed_imgs, r_pca, g_pca, b_pca, data_proj
+    return reconstructed_imgs, T_pca, data_proj
